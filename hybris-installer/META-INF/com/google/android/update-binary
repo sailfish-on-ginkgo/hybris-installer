@@ -47,7 +47,7 @@ PARTITION_PERSIST="$PARTITION_PREFIX/persist"
 # >>> Sanity checks >>>
 
 # Device
-[ "$CURRENT_DEVICE" != "$TARGET_DEVICE" ] && abort 7 "This package is for '$TARGET_DEVICE' devices; this is a '$CURRENT_DEVICE'."
+[ "$CURRENT_DEVICE" != "$TARGET_DEVICE" ] && [ "$CURRENT_DEVICE" != "willow" ] && abort 7 "This package is for '$TARGET_DEVICE' devices; this is a '$CURRENT_DEVICE'."
 
 # ext4 check for /data (& /cache)
 (mount | grep -q /cache || mount /cache) &&
@@ -152,20 +152,9 @@ if [[ "$TARGET_LOS_VER" = "16.0" && ! -f $ROOT/lib/systemd/system/mnt-vendor-per
 	fi
 fi
 
-if [ "$FORCE_REINSTALL" = "0" ]; then
-	log "Backing up droid-boot image..."
-	dd if=$PARTITION_BOOT of=$ROOT/boot/droid-boot.img bs=4m
-elif [ -f /tmp/droid-boot.img ]; then
-	log "Moving back droid-boot image..."
-	mv /tmp/droid-boot.img $ROOT/boot/
-fi
-
 log "Writing hybris-boot image..."
 dd if=$ROOT/boot/hybris-boot.img of=$PARTITION_BOOT || abort 11 "Couldn't write Hybris boot image!"
 
-log "Symlinking boot images to /sdcard..."
-ln -s $ROOT/boot/droid-boot.img /sdcard/
-ln -s $ROOT/boot/hybris-boot.img /sdcard/
 
 # <<< Script <<<
 
